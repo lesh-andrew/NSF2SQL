@@ -22,6 +22,7 @@ namespace NSF2SQL
         string mysqlDatabase = "";
         string mysqlUsername = "";
         string mysqlPassword = "";
+        DateTime? notesDateTime;
         int mysqlNumRowsPerInsert = 1000;
         Regex excludeField = new Regex("^(Form)$");//new Regex("^(\\$.*|Form|Readers)$");
         private static ISqlGenerator sqlGenerator;
@@ -128,6 +129,27 @@ namespace NSF2SQL
                             showHelp = true;
                         }
                         break;
+                    case "-notesDate":
+                        if (args.Length > i + 1)
+                        {
+                            string enteredDate = args[++i];
+                            bool validDate = DateTime.TryParse(enteredDate, out DateTime notesDate);
+                            if (!validDate)
+                            {
+                                error.Add($"Invalid date entered of {enteredDate}. Please reformat the entry and try again.");
+                                showHelp = true;
+                            }
+                            else
+                            {
+                                notesDateTime = notesDate;
+                            }
+                        }
+                        else
+                        {
+                            error.Add("Need valid date after -notesDate");
+                            showHelp = true;
+                        }
+                        break;
                     case "/?":
                     case "-?":
                     case "/help":
@@ -172,6 +194,7 @@ namespace NSF2SQL
                     "-notesDomain: The Domino server domain\n" +
                     "-notesPassword: The password for Lotus Notes\n" +
                     "-notesFile: The file path to the nsf database\n" +
+                    "-notesDate: Earliest creation date to build query on. See NotesDatabase.Search's plDate or notesDateTime depending on documentation.\n" +
                     "-mysqlDatabase: The database name for the exported documents\n" +
                     "-mysqlServer: The mysql server address or IP address\n" +
                     "-mysqlUsername: The username for the mysql server\n" +
@@ -342,9 +365,39 @@ namespace NSF2SQL
             string timeLeft = "";
             string timeElapsed = "0:00:00";
             string databasePath = treeView1.SelectedNode.Name;
+
+
+            string fieldName = tbFieldName?.Text ?? "";
+            DateTime start = dtFrom.Value,
+                        end = dtTo.Value;
+
+            bool filterFrom = dtFrom.Checked,
+                filterTo = dtTo.Checked;
+
+
+            string filter = "@All";
+            if (!string.IsNullOrEmpty(fieldName))
+            {
+                filter += $" & @If(@IsAvailable({fieldName}); ";
+
+                List<string> dateFilters = new List<string>();
+                if (filterFrom)
+                {
+                    dateFilters.Add($"{fieldName} >= [{dtFrom.Value:MM/dd/yyyy}]");
+                }
+                if (filterTo)
+                {
+                    dateFilters.Add($"{fieldName} <= [{dtTo.Value:MM/dd/yyyy}]");
+                }
+
+                filter += dateFilters.Any() ? string.Join(" & ", dateFilters) : "@True";
+                filter += $";@{cbIncludeMissingField.Checked})";
+            }
+
             ProgressDialog pDialog = new ProgressDialog();
             pDialog.Title = "Exporting Documents";
             #region Export Documents
+
             pDialog.DoWork += delegate(object dialog, DoWorkEventArgs e)
             {
                 ExportTarget exportDialog = new ExportTarget();
@@ -364,13 +417,30 @@ namespace NSF2SQL
                     {
                         db = nSession.GetDatabase(notesServer + "//" + notesDomain, databasePath, false);
                     }
+
+                    NotesDateTime ndt = notesDateTime.HasValue ? nSession.CreateDateTime(notesDateTime.Value.ToString())  : null;
+                    var matchingDocuments = db.Search(filter, ndt, 0);
+
                     //get all documents
-                    total = db.AllDocuments.Count;
-                    NotesDocumentCollection allDocuments = db.AllDocuments;
-                    NotesDocument doc = allDocuments.GetFirstDocument();
+                    total = matchingDocuments.Count;
+
+                    NotesDocument doc = matchingDocuments.GetFirstDocument();
                     startTicks = DateTime.Now.Ticks;
                     for (int i = 0; i < total; i++)
                     {
+                        DateTime docCreated = (DateTime)doc.Created;
+                        bool noFilterField = string.IsNullOrEmpty(fieldName);
+                        
+                        if (noFilterField && filterFrom && docCreated < start)
+                        {
+                            continue;
+                        }
+
+                        if (noFilterField && filterTo && docCreated > end)
+                        {
+                            continue;
+                        }
+
                         object[] items = (object[])doc.Items;
                         if (!string.IsNullOrWhiteSpace(attachmentsFolder))
                         {
@@ -396,10 +466,23 @@ namespace NSF2SQL
                             e.Cancel = true;
                             return;
                         }
-                        if (doc.HasItem("Form") && ((string[])doc.GetItemValue("Form"))[0] != "")
+
+                        var formItemValue = doc.HasItem("Form") ? doc.GetItemValue("Form") : null;
+                        string[] itemValues;
+
+                        if (formItemValue != null && formItemValue is Array)
+                        {
+                            itemValues = Array.ConvertAll(formItemValue as object[], Convert.ToString);
+                        } 
+                        else
+                        {
+                            itemValues = Array.Empty<string>();
+                        }
+
+                        if (itemValues.Any())
                         {
                             //get form
-                            string form = ((string[])doc.GetItemValue("Form"))[0];
+                            string form = itemValues[0];
 
                             if (!tables.ContainsKey(form))
                             {
@@ -408,7 +491,10 @@ namespace NSF2SQL
                             int row = tables[form].AddRow();
                             //get fields
                             //set multiple values
-                            foreach (NotesItem item in (NotesItem[])doc.Items)
+
+                            var docItems = doc?.Items?.CastArray<NotesItem>() ?? Array.Empty<NotesItem>();
+
+                            foreach (NotesItem item in docItems)
                             {
                                 //check if cancelled
                                 if (pDialog.IsCancelled)
@@ -435,8 +521,9 @@ namespace NSF2SQL
                                         type = "text";
                                         break;
                                 }
+
                                 object values = item.Values;
-                                bool multiple = ((object[])item.Values).Length > 1;
+                                bool multiple = values is Array a && a.Length > 1;
 
                                 if (!tables[form].Columns.ContainsKey(field))
                                 {
@@ -478,7 +565,7 @@ namespace NSF2SQL
                         }
                         //update progress
                         pDialog.ReportProgress(i, "Parsing Documents");
-                        doc = allDocuments.GetNextDocument(doc);
+                        doc = matchingDocuments.GetNextDocument(doc);
                     }
                     //add tables for columns with multiple values
                     Dictionary<string, Table> newTables = new Dictionary<string, Table>(tables.Count);

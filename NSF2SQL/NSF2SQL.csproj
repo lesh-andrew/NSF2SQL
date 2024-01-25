@@ -87,6 +87,7 @@
     <Compile Include="InputBox.cs" />
     <Compile Include="ISqlGenerator.cs" />
     <Compile Include="MySqlGenerator.cs" />
+    <Compile Include="ObjectExtension.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProgressDialog.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

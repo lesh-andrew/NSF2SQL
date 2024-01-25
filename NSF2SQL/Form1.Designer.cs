@@ -43,21 +43,22 @@
             this.txbAttachmentsFolder = new System.Windows.Forms.TextBox();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.bFilterBox = new System.Windows.Forms.GroupBox();
+            this.pTo = new System.Windows.Forms.Panel();
+            this.dtTo = new System.Windows.Forms.DateTimePicker();
+            this.lTo = new System.Windows.Forms.Label();
             this.pFrom = new System.Windows.Forms.Panel();
             this.dtFrom = new System.Windows.Forms.DateTimePicker();
             this.lFrom = new System.Windows.Forms.Label();
             this.pFieldName = new System.Windows.Forms.Panel();
             this.tbFieldName = new System.Windows.Forms.TextBox();
             this.lFieldName = new System.Windows.Forms.Label();
-            this.dtTo = new System.Windows.Forms.DateTimePicker();
-            this.lTo = new System.Windows.Forms.Label();
-            this.pTo = new System.Windows.Forms.Panel();
             this.ttFieldName = new System.Windows.Forms.ToolTip(this.components);
+            this.cbIncludeMissingField = new System.Windows.Forms.CheckBox();
             this.gpbAttachments.SuspendLayout();
             this.bFilterBox.SuspendLayout();
+            this.pTo.SuspendLayout();
             this.pFrom.SuspendLayout();
             this.pFieldName.SuspendLayout();
-            this.pTo.SuspendLayout();
             this.SuspendLayout();
             // 
             // bGetDatabases
@@ -196,6 +197,44 @@
             this.bFilterBox.TabStop = false;
             this.bFilterBox.Text = "Filter Documents";
             // 
+            // pTo
+            // 
+            this.pTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pTo.Controls.Add(this.dtTo);
+            this.pTo.Controls.Add(this.lTo);
+            this.pTo.Location = new System.Drawing.Point(296, 84);
+            this.pTo.Name = "pTo";
+            this.pTo.Size = new System.Drawing.Size(266, 69);
+            this.pTo.TabIndex = 2;
+            // 
+            // dtTo
+            // 
+            this.dtTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dtTo.Checked = false;
+            this.dtTo.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtTo.Location = new System.Drawing.Point(2, 31);
+            this.dtTo.Name = "dtTo";
+            this.dtTo.ShowCheckBox = true;
+            this.dtTo.Size = new System.Drawing.Size(252, 26);
+            this.dtTo.TabIndex = 1;
+            this.ttFieldName.SetToolTip(this.dtTo, "Optional, inclusive date to retrieve documents before");
+            // 
+            // lTo
+            // 
+            this.lTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lTo.AutoSize = true;
+            this.lTo.Location = new System.Drawing.Point(4, 8);
+            this.lTo.Name = "lTo";
+            this.lTo.Size = new System.Drawing.Size(27, 20);
+            this.lTo.TabIndex = 0;
+            this.lTo.Text = "To";
+            // 
             // pFrom
             // 
             this.pFrom.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -239,6 +278,7 @@
             this.pFieldName.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.pFieldName.Controls.Add(this.cbIncludeMissingField);
             this.pFieldName.Controls.Add(this.tbFieldName);
             this.pFieldName.Controls.Add(this.lFieldName);
             this.pFieldName.Location = new System.Drawing.Point(6, 24);
@@ -249,13 +289,15 @@
             // 
             // tbFieldName
             // 
-            this.tbFieldName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.tbFieldName.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tbFieldName.Location = new System.Drawing.Point(2, 23);
             this.tbFieldName.Name = "tbFieldName";
-            this.tbFieldName.Size = new System.Drawing.Size(549, 26);
+            this.tbFieldName.Size = new System.Drawing.Size(270, 26);
             this.tbFieldName.TabIndex = 1;
-            this.ttFieldName.SetToolTip(this.tbFieldName, "Date field in LN to query on. ");
+            this.ttFieldName.SetToolTip(this.tbFieldName, "Date field in LN to query on.  Leave blank to search by Document\'s Created proper" +
+        "ty.");
             // 
             // lFieldName
             // 
@@ -269,43 +311,21 @@
             this.lFieldName.TabIndex = 0;
             this.lFieldName.Text = "Field Name";
             // 
-            // dtTo
+            // cbIncludeMissingField
             // 
-            this.dtTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.cbIncludeMissingField.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.dtTo.Checked = false;
-            this.dtTo.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtTo.Location = new System.Drawing.Point(2, 31);
-            this.dtTo.Name = "dtTo";
-            this.dtTo.ShowCheckBox = true;
-            this.dtTo.Size = new System.Drawing.Size(252, 26);
-            this.dtTo.TabIndex = 1;
-            this.ttFieldName.SetToolTip(this.dtTo, "Optional, inclusive date to retrieve documents before");
-            // 
-            // lTo
-            // 
-            this.lTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lTo.AutoSize = true;
-            this.lTo.Location = new System.Drawing.Point(4, 8);
-            this.lTo.Name = "lTo";
-            this.lTo.Size = new System.Drawing.Size(27, 20);
-            this.lTo.TabIndex = 0;
-            this.lTo.Text = "To";
-            // 
-            // pTo
-            // 
-            this.pTo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pTo.Controls.Add(this.dtTo);
-            this.pTo.Controls.Add(this.lTo);
-            this.pTo.Location = new System.Drawing.Point(296, 84);
-            this.pTo.Name = "pTo";
-            this.pTo.Size = new System.Drawing.Size(266, 69);
-            this.pTo.TabIndex = 2;
+            this.cbIncludeMissingField.AutoSize = true;
+            this.cbIncludeMissingField.CheckAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.cbIncludeMissingField.Location = new System.Drawing.Point(323, 5);
+            this.cbIncludeMissingField.Name = "cbIncludeMissingField";
+            this.cbIncludeMissingField.Size = new System.Drawing.Size(173, 45);
+            this.cbIncludeMissingField.TabIndex = 2;
+            this.cbIncludeMissingField.Text = "Include when missing?";
+            this.ttFieldName.SetToolTip(this.cbIncludeMissingField, "Include documents that are missing the entered field name in export when chekced." +
+        "");
+            this.cbIncludeMissingField.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -327,12 +347,12 @@
             this.gpbAttachments.ResumeLayout(false);
             this.gpbAttachments.PerformLayout();
             this.bFilterBox.ResumeLayout(false);
+            this.pTo.ResumeLayout(false);
+            this.pTo.PerformLayout();
             this.pFrom.ResumeLayout(false);
             this.pFrom.PerformLayout();
             this.pFieldName.ResumeLayout(false);
             this.pFieldName.PerformLayout();
-            this.pTo.ResumeLayout(false);
-            this.pTo.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -363,6 +383,7 @@
         private System.Windows.Forms.DateTimePicker dtTo;
         private System.Windows.Forms.Label lTo;
         private System.Windows.Forms.ToolTip ttFieldName;
+        private System.Windows.Forms.CheckBox cbIncludeMissingField;
     }
 }
 
