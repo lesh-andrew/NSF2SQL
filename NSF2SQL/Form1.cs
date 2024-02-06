@@ -426,6 +426,7 @@ namespace NSF2SQL
 
                     NotesDocument doc = matchingDocuments.GetFirstDocument();
                     startTicks = DateTime.Now.Ticks;
+                    var writer = File.AppendText($"C:\\\\Temp\\NSF2SQL_{DateTime.Now:yyyyMMddHHmm}.log");
                     for (int i = 0; i < total; i++)
                     {
                         DateTime docCreated = (DateTime)doc.Created;
@@ -446,16 +447,32 @@ namespace NSF2SQL
                         {
                             foreach (NotesItem nItem in items)
                             {
-                                if (nItem.Name == "$FILE")
+                                if (nItem.Name == "$FILE" && (nItem?.Values?.CastArray<object>()?.Length ?? 0) > 0)
                                 {
                                     NotesItem file = doc.GetFirstItem("$File");
 
-                                    string fileName = ((object[])nItem.Values)[0].ToString();
+                                    object[] fileObjects = (object[])nItem.Values;
 
-                                    NotesEmbeddedObject attachfile = doc.GetAttachment(fileName);
+                                    try
+                                    {
+                                        string fileName = fileObjects?.ElementAtOrDefault(0)?.ToString() ?? "";
 
-                                    if (attachfile != null)
-                                        attachfile.ExtractFile($@"{attachmentsFolder}\{fileName}");
+                                        if (string.IsNullOrWhiteSpace(fileName))
+                                        {
+                                            writer.WriteLine($"$FILE did not provide a valid file name for document ID {doc.NoteID}; string.IsNullOrWhiteSpace was used.");
+                                            writer.Flush();
+                                        }
+
+                                        NotesEmbeddedObject attachfile = doc.GetAttachment(fileName);
+
+                                        attachfile?.ExtractFile($@"{attachmentsFolder}\{fileName}");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        writer.WriteLine($"Exception: "+ ex.Message + " Inner: " + ex.InnerException.Message);
+                                        writer.Flush();
+                                        MessageBox.Show(ex.Message+ " Inner: "+ex.InnerException.Message);
+                                    }
                                 }
                             }
                         }
